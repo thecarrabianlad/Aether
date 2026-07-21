@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 /// is meant to be dropped straight into the `body:` of that Scaffold.
 /// ---------------------------------------------------------------------
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   // Palette
@@ -23,9 +23,251 @@ class DashboardScreen extends StatelessWidget {
   static const white = Color(0xFFF5F5F5);
 
   @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  // ---------------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------------
+
+  // Reference date lines up with the original "Tuesday, 12th August 2025"
+  // mock. `_dayOffset` tracks how many days the user has navigated away
+  // from it via the date navigator.
+  static final DateTime _referenceDate = DateTime(2025, 8, 12);
+  int _dayOffset = 0;
+
+  final TimeOfDay _currentTime = const TimeOfDay(hour: 7, minute: 42);
+  final double _progressPercent = 0.625;
+
+  final int _tasksPending = 6;
+  final int _classesToday = 3;
+  final int _habitsCompleted = 4;
+  final int _habitsTotal = 7;
+  final int _healthScore = 72;
+
+  final List<_ScheduleItemData> _scheduleItems = const [
+    _ScheduleItemData(
+      time: '9:00 AM',
+      title: 'Physics Class',
+      subtitle: 'Electromagnetism',
+      icon: Icons.menu_book_outlined,
+      color: DashboardScreen.purple,
+    ),
+    _ScheduleItemData(
+      time: '11:30 AM',
+      title: 'Maths Practice',
+      subtitle: 'Calculus & Integrals',
+      icon: Icons.calculate_outlined,
+      color: Color(0xFFE08A2E),
+    ),
+    _ScheduleItemData(
+      time: '3:00 PM',
+      title: 'Chemistry Revision',
+      subtitle: 'Organic Chemistry',
+      icon: Icons.science_outlined,
+      color: Color(0xFF3B82F6),
+    ),
+  ];
+
+  List<_TaskItemData> _tasks = const [
+    _TaskItemData(
+      title: 'Finish Physics Notes',
+      subtitle: 'Electromagnetism',
+      flagged: true,
+    ),
+    _TaskItemData(
+      title: 'Practice PYQs',
+      subtitle: 'JEE Main 2024',
+      flagged: true,
+    ),
+    _TaskItemData(
+      title: 'Workout',
+      subtitle: 'Completed',
+      completed: true,
+    ),
+  ];
+
+  final List<_HabitItemData> _habits = const [
+    _HabitItemData(
+        icon: Icons.menu_book_outlined,
+        title: 'Study',
+        fraction: '5/7',
+        progress: 5 / 7),
+    _HabitItemData(
+        icon: Icons.self_improvement,
+        title: 'Meditation',
+        fraction: '4/7',
+        progress: 4 / 7),
+    _HabitItemData(
+        icon: Icons.water_drop_outlined,
+        title: 'No Sugar',
+        fraction: '5/7',
+        progress: 5 / 7),
+    _HabitItemData(
+        icon: Icons.nightlight_outlined,
+        title: 'Sleep Early',
+        fraction: '3/7',
+        progress: 3 / 7),
+  ];
+
+  final _UpcomingEventData _upcomingEvent = const _UpcomingEventData(
+    day: '18',
+    month: 'AUG',
+    title: 'Maths Test',
+    subtitle: 'Calculus • 5 Chapters',
+    daysLeftLabel: '6 Days Left',
+  );
+
+  // ---------------------------------------------------------------------
+  // Derived getters
+  // ---------------------------------------------------------------------
+
+  DateTime get _selectedDate => _referenceDate.add(Duration(days: _dayOffset));
+
+  static const _weekdayNames = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+
+  static const _monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  String get _timeText =>
+      '${_currentTime.hourOfPeriod == 0 ? 12 : _currentTime.hourOfPeriod}:${_currentTime.minute.toString().padLeft(2, '0')}';
+
+  String get _periodText => _currentTime.period == DayPeriod.am ? 'AM' : 'PM';
+
+  String get _weekdayLabel => _weekdayNames[_selectedDate.weekday - 1];
+
+  String _ordinalSuffix(int day) {
+    if (day >= 11 && day <= 13) return 'th';
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
+  String get _fullDateLabel {
+    final day = _selectedDate.day;
+    final month = _monthNames[_selectedDate.month - 1];
+    final year = _selectedDate.year;
+    return '$day${_ordinalSuffix(day)} $month $year';
+  }
+
+  String get _dateNavigatorLabel {
+    if (_dayOffset == 0) return 'Today';
+    if (_dayOffset == -1) return 'Yesterday';
+    if (_dayOffset == 1) return 'Tomorrow';
+    return _fullDateLabel;
+  }
+
+  String get _habitsCompletedFraction => '$_habitsCompleted/$_habitsTotal';
+
+  String get _healthScoreLabel => '$_healthScore%';
+
+  List<_GlanceItemData> get _glanceItems => [
+        _GlanceItemData(
+          icon: Icons.assignment_outlined,
+          iconColor: DashboardScreen.red,
+          value: '$_tasksPending',
+          label: 'Tasks pending',
+        ),
+        _GlanceItemData(
+          icon: Icons.menu_book_outlined,
+          iconColor: DashboardScreen.purple,
+          value: '$_classesToday',
+          label: 'Classes today',
+        ),
+        _GlanceItemData(
+          icon: Icons.check_circle_outline,
+          iconColor: DashboardScreen.green,
+          value: _habitsCompletedFraction,
+          label: 'Habits completed',
+        ),
+        _GlanceItemData(
+          icon: Icons.favorite_border,
+          iconColor: DashboardScreen.red,
+          value: _healthScoreLabel,
+          label: 'Health score',
+        ),
+      ];
+
+  // ---------------------------------------------------------------------
+  // Helper methods
+  // ---------------------------------------------------------------------
+
+  void _goToPreviousDay() {
+    setState(() {
+      _dayOffset -= 1;
+    });
+  }
+
+  void _goToNextDay() {
+    setState(() {
+      _dayOffset += 1;
+    });
+  }
+
+  void _toggleTask(int index) {
+    setState(() {
+      final t = _tasks[index];
+      _tasks = List.of(_tasks)
+        ..[index] = _TaskItemData(
+          title: t.title,
+          subtitle: t.subtitle,
+          completed: !t.completed,
+          flagged: t.flagged,
+        );
+    });
+  }
+
+  void _onViewAllSchedule() {
+    // TODO: navigate to full schedule view
+    print('View all schedule tapped');
+  }
+
+  void _onViewAllTasks() {
+    // TODO: navigate to full tasks view
+    print('View all tasks tapped');
+  }
+
+  void _onViewAllHabits() {
+    // TODO: navigate to full habits view
+    print('View all habits tapped');
+  }
+
+  // ---------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------
+
+  @override
   Widget build(BuildContext context) {
     return Container(
-      color: bg,
+      color: DashboardScreen.bg,
       child: SafeArea(
         top: false,
         bottom: false,
@@ -34,28 +276,52 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _HeaderRow(),
+              _HeaderRow(
+                timeText: _timeText,
+                periodText: _periodText,
+                weekdayLabel: _weekdayLabel,
+                fullDateLabel: _fullDateLabel,
+                progressPercent: _progressPercent,
+              ),
               const SizedBox(height: 16),
-              _DateNavigator(),
+              _DateNavigator(
+                label: _dateNavigatorLabel,
+                onPrevious: _goToPreviousDay,
+                onNext: _goToNextDay,
+              ),
               const SizedBox(height: 20),
-              _GlanceRow(),
+              _GlanceRow(items: _glanceItems),
               const SizedBox(height: 24),
-              _SectionHeader(title: 'Today\'s Schedule', onViewAll: () {}),
+              _SectionHeader(
+                title: 'Today\'s Schedule',
+                onViewAll: _onViewAllSchedule,
+              ),
               const SizedBox(height: 12),
-              _ScheduleCard(),
+              _ScheduleCard(items: _scheduleItems),
               const SizedBox(height: 20),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: _TasksCard()),
+                  Expanded(
+                    child: _TasksCard(
+                      tasks: _tasks,
+                      onViewAll: _onViewAllTasks,
+                      onToggleTask: _toggleTask,
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: _HabitTrackerCard()),
+                  Expanded(
+                    child: _HabitTrackerCard(
+                      habits: _habits,
+                      onViewAll: _onViewAllHabits,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
               _SectionHeader(title: 'Upcoming', onViewAll: () {}),
               const SizedBox(height: 12),
-              _UpcomingCard(),
+              _UpcomingCard(event: _upcomingEvent),
             ],
           ),
         ),
@@ -68,7 +334,19 @@ class DashboardScreen extends StatelessWidget {
 // Header: time / date + progress ring
 // ---------------------------------------------------------------------
 class _HeaderRow extends StatelessWidget {
-  const _HeaderRow();
+  final String timeText;
+  final String periodText;
+  final String weekdayLabel;
+  final String fullDateLabel;
+  final double progressPercent;
+
+  const _HeaderRow({
+    required this.timeText,
+    required this.periodText,
+    required this.weekdayLabel,
+    required this.fullDateLabel,
+    required this.progressPercent,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,20 +360,20 @@ class _HeaderRow extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
-                children: const [
+                children: [
                   Text(
-                    '7:42',
-                    style: TextStyle(
+                    timeText,
+                    style: const TextStyle(
                       color: DashboardScreen.white,
                       fontSize: 40,
                       fontWeight: FontWeight.w600,
                       height: 1,
                     ),
                   ),
-                  SizedBox(width: 6),
+                  const SizedBox(width: 6),
                   Text(
-                    'AM',
-                    style: TextStyle(
+                    periodText,
+                    style: const TextStyle(
                       color: DashboardScreen.grey,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -104,18 +382,18 @@ class _HeaderRow extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text(
-                'Tuesday',
-                style: TextStyle(
+              Text(
+                weekdayLabel,
+                style: const TextStyle(
                   color: DashboardScreen.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 2),
-              const Text(
-                '12th August 2025',
-                style: TextStyle(
+              Text(
+                fullDateLabel,
+                style: const TextStyle(
                   color: DashboardScreen.grey,
                   fontSize: 13,
                 ),
@@ -124,7 +402,7 @@ class _HeaderRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
-        const _ProgressRing(percent: 0.625),
+        _ProgressRing(percent: progressPercent),
       ],
     );
   }
@@ -206,7 +484,15 @@ class _ProgressRing extends StatelessWidget {
 // Date navigator: "< Today >"
 // ---------------------------------------------------------------------
 class _DateNavigator extends StatelessWidget {
-  const _DateNavigator();
+  final String label;
+  final VoidCallback onPrevious;
+  final VoidCallback onNext;
+
+  const _DateNavigator({
+    required this.label,
+    required this.onPrevious,
+    required this.onNext,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -220,16 +506,24 @@ class _DateNavigator extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Icon(Icons.chevron_left, color: DashboardScreen.grey, size: 22),
-          const Text(
-            'Today',
-            style: TextStyle(
+          GestureDetector(
+            onTap: onPrevious,
+            child: const Icon(Icons.chevron_left,
+                color: DashboardScreen.grey, size: 22),
+          ),
+          Text(
+            label,
+            style: const TextStyle(
               color: DashboardScreen.white,
               fontSize: 15,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const Icon(Icons.chevron_right, color: DashboardScreen.grey, size: 22),
+          GestureDetector(
+            onTap: onNext,
+            child: const Icon(Icons.chevron_right,
+                color: DashboardScreen.grey, size: 22),
+          ),
         ],
       ),
     );
@@ -239,8 +533,24 @@ class _DateNavigator extends StatelessWidget {
 // ---------------------------------------------------------------------
 // "Today at a glance" — 4 stat cards
 // ---------------------------------------------------------------------
+class _GlanceItemData {
+  final IconData icon;
+  final Color iconColor;
+  final String value;
+  final String label;
+
+  const _GlanceItemData({
+    required this.icon,
+    required this.iconColor,
+    required this.value,
+    required this.label,
+  });
+}
+
 class _GlanceRow extends StatelessWidget {
-  const _GlanceRow();
+  final List<_GlanceItemData> items;
+
+  const _GlanceRow({required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -257,42 +567,18 @@ class _GlanceRow extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Row(
-          children: const [
-            Expanded(
-              child: _GlanceCard(
-                icon: Icons.assignment_outlined,
-                iconColor: DashboardScreen.red,
-                value: '6',
-                label: 'Tasks pending',
+          children: [
+            for (var i = 0; i < items.length; i++) ...[
+              if (i > 0) const SizedBox(width: 10),
+              Expanded(
+                child: _GlanceCard(
+                  icon: items[i].icon,
+                  iconColor: items[i].iconColor,
+                  value: items[i].value,
+                  label: items[i].label,
+                ),
               ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: _GlanceCard(
-                icon: Icons.menu_book_outlined,
-                iconColor: DashboardScreen.purple,
-                value: '3',
-                label: 'Classes today',
-              ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: _GlanceCard(
-                icon: Icons.check_circle_outline,
-                iconColor: DashboardScreen.green,
-                value: '4/7',
-                label: 'Habits completed',
-              ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: _GlanceCard(
-                icon: Icons.favorite_border,
-                iconColor: DashboardScreen.red,
-                value: '72%',
-                label: 'Health score',
-              ),
-            ),
+            ],
           ],
         ),
       ],
@@ -405,31 +691,9 @@ class _ScheduleItemData {
 }
 
 class _ScheduleCard extends StatelessWidget {
-  const _ScheduleCard();
+  final List<_ScheduleItemData> items;
 
-  static const items = [
-    _ScheduleItemData(
-      time: '9:00 AM',
-      title: 'Physics Class',
-      subtitle: 'Electromagnetism',
-      icon: Icons.menu_book_outlined,
-      color: DashboardScreen.purple,
-    ),
-    _ScheduleItemData(
-      time: '11:30 AM',
-      title: 'Maths Practice',
-      subtitle: 'Calculus & Integrals',
-      icon: Icons.calculate_outlined,
-      color: Color(0xFFE08A2E),
-    ),
-    _ScheduleItemData(
-      time: '3:00 PM',
-      title: 'Chemistry Revision',
-      subtitle: 'Organic Chemistry',
-      icon: Icons.science_outlined,
-      color: Color(0xFF3B82F6),
-    ),
-  ];
+  const _ScheduleCard({required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -552,25 +816,15 @@ class _TaskItemData {
 }
 
 class _TasksCard extends StatelessWidget {
-  const _TasksCard();
+  final List<_TaskItemData> tasks;
+  final VoidCallback onViewAll;
+  final ValueChanged<int> onToggleTask;
 
-  static const tasks = [
-    _TaskItemData(
-      title: 'Finish Physics Notes',
-      subtitle: 'Electromagnetism',
-      flagged: true,
-    ),
-    _TaskItemData(
-      title: 'Practice PYQs',
-      subtitle: 'JEE Main 2024',
-      flagged: true,
-    ),
-    _TaskItemData(
-      title: 'Workout',
-      subtitle: 'Completed',
-      completed: true,
-    ),
-  ];
+  const _TasksCard({
+    required this.tasks,
+    required this.onViewAll,
+    required this.onToggleTask,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -586,8 +840,8 @@ class _TasksCard extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text(
+            children: [
+              const Text(
                 'Tasks',
                 style: TextStyle(
                   color: DashboardScreen.white,
@@ -595,19 +849,28 @@ class _TasksCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              Row(
-                children: [
-                  Text('View All',
-                      style: TextStyle(color: DashboardScreen.grey, fontSize: 11)),
-                  Icon(Icons.chevron_right,
-                      color: DashboardScreen.grey, size: 14),
-                ],
+              GestureDetector(
+                onTap: onViewAll,
+                child: const Row(
+                  children: [
+                    Text('View All',
+                        style:
+                            TextStyle(color: DashboardScreen.grey, fontSize: 11)),
+                    Icon(Icons.chevron_right,
+                        color: DashboardScreen.grey, size: 14),
+                  ],
+                ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          ...tasks.map((t) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 7),
+          ...List.generate(tasks.length, (i) {
+            final t = tasks[i];
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 7),
+              child: GestureDetector(
+                onTap: () => onToggleTask(i),
+                behavior: HitTestBehavior.opaque,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -659,7 +922,9 @@ class _TasksCard extends StatelessWidget {
                           size: 14, color: DashboardScreen.red),
                   ],
                 ),
-              )),
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -684,30 +949,10 @@ class _HabitItemData {
 }
 
 class _HabitTrackerCard extends StatelessWidget {
-  const _HabitTrackerCard();
+  final List<_HabitItemData> habits;
+  final VoidCallback onViewAll;
 
-  static const habits = [
-    _HabitItemData(
-        icon: Icons.menu_book_outlined,
-        title: 'Study',
-        fraction: '5/7',
-        progress: 5 / 7),
-    _HabitItemData(
-        icon: Icons.self_improvement,
-        title: 'Meditation',
-        fraction: '4/7',
-        progress: 4 / 7),
-    _HabitItemData(
-        icon: Icons.water_drop_outlined,
-        title: 'No Sugar',
-        fraction: '5/7',
-        progress: 5 / 7),
-    _HabitItemData(
-        icon: Icons.nightlight_outlined,
-        title: 'Sleep Early',
-        fraction: '3/7',
-        progress: 3 / 7),
-  ];
+  const _HabitTrackerCard({required this.habits, required this.onViewAll});
 
   @override
   Widget build(BuildContext context) {
@@ -723,8 +968,8 @@ class _HabitTrackerCard extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text(
+            children: [
+              const Text(
                 'Habit Tracker',
                 style: TextStyle(
                   color: DashboardScreen.white,
@@ -732,13 +977,17 @@ class _HabitTrackerCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              Row(
-                children: [
-                  Text('View All',
-                      style: TextStyle(color: DashboardScreen.grey, fontSize: 11)),
-                  Icon(Icons.chevron_right,
-                      color: DashboardScreen.grey, size: 14),
-                ],
+              GestureDetector(
+                onTap: onViewAll,
+                child: const Row(
+                  children: [
+                    Text('View All',
+                        style:
+                            TextStyle(color: DashboardScreen.grey, fontSize: 11)),
+                    Icon(Icons.chevron_right,
+                        color: DashboardScreen.grey, size: 14),
+                  ],
+                ),
               ),
             ],
           ),
@@ -792,8 +1041,26 @@ class _HabitTrackerCard extends StatelessWidget {
 // ---------------------------------------------------------------------
 // Upcoming card
 // ---------------------------------------------------------------------
+class _UpcomingEventData {
+  final String day;
+  final String month;
+  final String title;
+  final String subtitle;
+  final String daysLeftLabel;
+
+  const _UpcomingEventData({
+    required this.day,
+    required this.month,
+    required this.title,
+    required this.subtitle,
+    required this.daysLeftLabel,
+  });
+}
+
 class _UpcomingCard extends StatelessWidget {
-  const _UpcomingCard();
+  final _UpcomingEventData event;
+
+  const _UpcomingCard({required this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -815,12 +1082,12 @@ class _UpcomingCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: DashboardScreen.cardBorder),
             ),
-            child: const Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '18',
-                  style: TextStyle(
+                  event.day,
+                  style: const TextStyle(
                     color: DashboardScreen.white,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -828,8 +1095,8 @@ class _UpcomingCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'AUG',
-                  style: TextStyle(
+                  event.month,
+                  style: const TextStyle(
                     color: DashboardScreen.red,
                     fontSize: 9,
                     fontWeight: FontWeight.w600,
@@ -839,29 +1106,29 @@ class _UpcomingCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Maths Test',
-                  style: TextStyle(
+                  event.title,
+                  style: const TextStyle(
                     color: DashboardScreen.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
-                  'Calculus • 5 Chapters',
-                  style: TextStyle(color: DashboardScreen.grey, fontSize: 12),
+                  event.subtitle,
+                  style: const TextStyle(color: DashboardScreen.grey, fontSize: 12),
                 ),
               ],
             ),
           ),
-          const Text(
-            '6 Days Left',
-            style: TextStyle(
+          Text(
+            event.daysLeftLabel,
+            style: const TextStyle(
               color: DashboardScreen.red,
               fontSize: 12,
               fontWeight: FontWeight.w500,

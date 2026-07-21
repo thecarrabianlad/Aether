@@ -17,6 +17,48 @@ class AetherApp extends StatefulWidget {
 class _AetherAppState extends State<AetherApp> {
   int _selectedIndex = 0;
 
+  static const List<Widget> _screens = [
+    DashboardScreen(),
+    Center(
+      child: Text(
+        'Academics',
+        style: TextStyle(color: Colors.white, fontSize: 32),
+      ),
+    ),
+    Center(
+      child: Text(
+        'Habits',
+        style: TextStyle(color: Colors.white, fontSize: 32),
+      ),
+    ),
+    Center(
+      child: Text(
+        'Health',
+        style: TextStyle(color: Colors.white, fontSize: 32),
+      ),
+    ),
+  ];
+
+  void _onMenuTap() {
+    // TODO: open drawer / menu
+    print('Menu tapped');
+  }
+
+  void _onProfileTap() {
+    // TODO: navigate to profile
+    print('Profile tapped');
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  void _onAddTapped() {
+    print('Add button tapped');
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,53 +70,21 @@ class _AetherAppState extends State<AetherApp> {
         body: Column(
           children: [
             DashboardTopBar(
-              onMenuTap: () {
-                // TODO: open drawer / menu
-                print('Menu tapped');
-              },
-              onProfileTap: () {
-                // TODO: navigate to profile
-                print('Profile tapped');
-              },
+              onMenuTap: _onMenuTap,
+              onProfileTap: _onProfileTap,
             ),
             Expanded(
               child: IndexedStack(
                 index: _selectedIndex,
-                children: const [
-                  DashboardScreen(),
-                  Center(
-                    child: Text(
-                      'Academics',
-                      style: TextStyle(color: Colors.white, fontSize: 32),
-                    ),
-                  ),
-                  Center(
-                    child: Text(
-                      'Habits',
-                      style: TextStyle(color: Colors.white, fontSize: 32),
-                    ),
-                  ),
-                  Center(
-                    child: Text(
-                      'Health',
-                      style: TextStyle(color: Colors.white, fontSize: 32),
-                    ),
-                  ),
-                ],
+                children: _screens,
               ),
             ),
           ],
         ),
         bottomNavigationBar: BottomNavbar(
           selectedIndex: _selectedIndex,
-          onItemTapped: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          onAddTapped: () {
-            print('Add button tapped');
-          },
+          onItemTapped: _onItemTapped,
+          onAddTapped: _onAddTapped,
         ),
       ),
     );
