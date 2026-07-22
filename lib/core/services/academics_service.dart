@@ -3,6 +3,7 @@ import 'package:aether/core/database/tables/courses.dart';
 import 'package:aether/core/database/tables/lectures.dart';
 import 'package:aether/core/database/tables/assignments.dart';
 import 'package:aether/core/services/supabase_service.dart';
+import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 class AcademicsService {
@@ -17,56 +18,36 @@ class AcademicsService {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return [];
 
-    // Sync from Supabase to local
-    final remote = await _supabase
-        .from('courses')
-        .select()
-        .eq('user_id', userId);
+    final remote = await _supabase.from('courses').select().eq('user_id', userId);
 
     for (final row in remote) {
+      final r = row as Map<String, dynamic>;
       final exists = await (_db.select(_db.courses)
-            ..where((t) => t.id.equals(row['id'])))
+            ..where((t) => t.id.equals(r['id'] as String)))
           .getSingleOrNull();
+      final course = Course(
+        id: r['id'] as String,
+        userId: r['userId'] as String? ?? userId,
+        name: r['name'] as String? ?? '',
+        code: r['code'] as String?,
+        professor: r['professor'] as String?,
+        color: r['color'] as String? ?? '#8B5CF6',
+        icon: r['icon'] as String?,
+        semester: r['semester'] as String?,
+        location: r['location'] as String?,
+        credits: r['credits'] as int?,
+        scheduleDays: r['scheduleDays'] is List
+            ? (r['scheduleDays'] as List).join(',')
+            : r['scheduleDays'] as String?,
+        scheduleStart: r['scheduleStart'] as String?,
+        scheduleEnd: r['scheduleEnd'] as String?,
+        createdAt: r['createdAt'] is String ? DateTime.parse(r['createdAt'] as String) : DateTime.now(),
+        updatedAt: r['updatedAt'] is String ? DateTime.parse(r['updatedAt'] as String) : DateTime.now(),
+      );
       if (exists != null) {
-        await _db.update(_db.courses).replace(Course(
-          id: row['id'],
-          userId: row['userId'],
-          name: row['name'],
-          code: row['code'],
-          professor: row['professor'],
-          color: row['color'],
-          icon: row['icon'],
-          semester: row['semester'],
-          location: row['location'],
-          credits: row['credits'],
-          scheduleDays: row['scheduleDays'] is List
-              ? (row['scheduleDays'] as List).join(',')
-              : row['scheduleDays'],
-          scheduleStart: row['scheduleStart'],
-          scheduleEnd: row['scheduleEnd'],
-          createdAt: DateTime.parse(row['createdAt']),
-          updatedAt: DateTime.parse(row['updatedAt']),
-        ));
+        await _db.update(_db.courses).replace(course);
       } else {
-        await _db.into(_db.courses).insert(Course(
-          id: row['id'],
-          userId: row['userId'],
-          name: row['name'],
-          code: row['code'],
-          professor: row['professor'],
-          color: row['color'],
-          icon: row['icon'],
-          semester: row['semester'],
-          location: row['location'],
-          credits: row['credits'],
-          scheduleDays: row['scheduleDays'] is List
-              ? (row['scheduleDays'] as List).join(',')
-              : row['scheduleDays'],
-          scheduleStart: row['scheduleStart'],
-          scheduleEnd: row['scheduleEnd'],
-          createdAt: DateTime.parse(row['createdAt']),
-          updatedAt: DateTime.parse(row['updatedAt']),
-        ));
+        await _db.into(_db.courses).insert(course);
       }
     }
 
@@ -74,8 +55,6 @@ class AcademicsService {
   }
 
   Stream<List<Course>> watchCourses() {
-    final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) return Stream.value([]);
     return (_db.select(_db.courses).watch());
   }
 
@@ -98,7 +77,6 @@ class AcademicsService {
     final id = const Uuid().v4();
     final now = DateTime.now();
 
-    // Insert into Supabase
     await _supabase.from('courses').insert({
       'id': id,
       'userId': userId,
@@ -117,7 +95,6 @@ class AcademicsService {
       'updatedAt': now.toIso8601String(),
     });
 
-    // Insert locally
     return _db.into(_db.courses).insertReturning(Course(
       id: id,
       userId: userId,
@@ -162,57 +139,86 @@ class AcademicsService {
     await _db.update(_db.courses).replace(course.copyWith(updatedAt: now));
   }
 
-  // ── Lectures ---------
-  Future<List<Lecture>> getLectures({
-    String? courseId,
-    bool? today,
-  }) async {
+  // ── Lectures ──────────────────────────────────────────
+
+  Future<List<Lecture>> getLectures({String? courseId, bool? today}) async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return [];
 
-    var query = _supabase.from('lectures').select().eq('userId', userId);
-    if (courseId != null) query = query.eq('courseId', courseId);
+    var query = _supabase.from('lectures').select().eq('user_id', userId);
+    if (courseId != null) query = query.eq('course_id', courseId);
     if (today == true) {
       final start = DateTime.now().toUtc().copyWith(hour: 0, minute: 0);
       final end = start.add(const Duration(days: 1));
-      query = query.gte('scheduledAt', start.toIso8601String()).lt('scheduledAt', end.toIso8601String());
+      query = query.gte('scheduled_at', start.toIso8601String()).lt('scheduled_at', end.toIso8601String());
     }
 
-    final remote = await query.order('scheduledAt', ascending: true);
-    final lectures = remote.map<Lecture>((row) => Lecture(
-      id: row['id'],
-      courseId: row['courseId'],
-      userId: row['userId'],
-      title: row['title'],
-      chapter: row['chapter'],
-      tag: row['tag'],
-      scheduledAt: row['scheduledAt'] != null ? DateTime.parse(row['scheduledAt']) : null,
-      durationMinutes: row['durationMinutes'],
-      isCompleted: row['isCompleted'],
-      completedAt: row['completedAt'] != null ? DateTime.parse(row['completedAt']) : null,
-      createdAt: DateTime.parse(row['createdAt']),
-      updatedAt: DateTime.parse(row['updatedAt']),
-    )).toList();
+    final remote = await query.order('scheduled_at', ascending: true);
+    final lectures = remote.map((row) {
+      final r = row as Map<String, dynamic>;
+      return Lecture(
+        id: r['id'] as String,
+        courseId: r['course_id'] as String? ?? courseId ?? '',
+        userId: r['userId'] as String? ?? userId,
+        title: r['title'] as String? ?? '',
+        chapter: r['chapter'] as String?,
+        tag: r['tag'] as String?,
+        scheduledAt: r['scheduled_at'] != null ? DateTime.parse(r['scheduled_at'] as String) : null,
+        durationMinutes: r['duration_minutes'] as int? ?? 90,
+        isCompleted: r['is_completed'] as bool? ?? false,
+        completedAt: r['completed_at'] != null ? DateTime.parse(r['completed_at'] as String) : null,
+        createdAt: r['created_at'] is String ? DateTime.parse(r['created_at'] as String) : DateTime.now(),
+        updatedAt: r['updated_at'] is String ? DateTime.parse(r['updated_at'] as String) : DateTime.now(),
+      );
+    }).toList();
 
-    // Sync to local
     for (final lec in lectures) {
-      final exists = await _db.select(_db.lectures).getSingleOrNull();
+      final exists = await (_db.select(_db.lectures)
+            ..where((l) => l.id.equals(lec.id)))
+          .getSingleOrNull();
       if (exists != null) {
         await _db.update(_db.lectures).replace(lec);
       } else {
         await _db.into(_db.lectures).insert(lec);
       }
     }
-
     return lectures;
+  }
+
+  Future<void> createLecture(String courseId, String title) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('Not authenticated');
+    final id = const Uuid().v4();
+    final now = DateTime.now();
+
+    await _supabase.from('lectures').insert({
+      'id': id,
+      'course_id': courseId,
+      'user_id': userId,
+      'title': title,
+      'is_completed': false,
+      'created_at': now.toIso8601String(),
+      'updated_at': now.toIso8601String(),
+    });
+
+    await _db.into(_db.lectures).insert(Lecture(
+      id: id,
+      courseId: courseId,
+      userId: userId,
+      title: title,
+      isCompleted: false,
+      durationMinutes: 90,
+      createdAt: now,
+      updatedAt: now,
+    ));
   }
 
   Future<void> toggleLectureCompletion(String lectureId, bool completed) async {
     final now = DateTime.now();
     await _supabase.from('lectures').update({
-      'isCompleted': completed,
-      'completedAt': completed ? now.toIso8601String() : null,
-      'updatedAt': now.toIso8601String(),
+      'is_completed': completed,
+      'completed_at': completed ? now.toIso8601String() : null,
+      'updated_at': now.toIso8601String(),
     }).eq('id', lectureId);
 
     await (_db.update(_db.lectures)
@@ -224,50 +230,78 @@ class AcademicsService {
       ));
   }
 
-  // ── Assignments ──
-  Future<List<Assignment>> watchAssignments({
-    String? courseId,
-  }) async {
+  // ── Assignments ──────────────────────────────────────
+
+  Future<List<Assignment>> watchAssignments({String? courseId}) async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return [];
 
-    var query = _supabase.from('assignments').select().eq('userId', userId);
-    if (courseId != null) query = query.eq('courseId', courseId);
+    var query = _supabase.from('assignments').select().eq('user_id', userId);
+    if (courseId != null) query = query.eq('course_id', courseId);
 
-    final remote = await query.from_list(/* ... */) as List<Map<String, dynamic>>;
+    final remote = await query.order('due_date', ascending: true);
+    final assignments = remote.map((row) {
+      final r = row as Map<String, dynamic>;
+      return Assignment(
+        id: r['id'] as String,
+        courseId: r['course_id'] as String? ?? courseId ?? '',
+        userId: r['userId'] as String? ?? userId,
+        title: r['title'] as String? ?? '',
+        description: r['description'] as String?,
+        dueDate: r['due_date'] != null ? DateTime.parse(r['due_date'] as String) : null,
+        isCompleted: r['is_completed'] as bool? ?? false,
+        completedAt: r['completed_at'] != null ? DateTime.parse(r['completed_at'] as String) : null,
+        createdAt: r['created_at'] is String ? DateTime.parse(r['created_at'] as String) : DateTime.now(),
+        updatedAt: r['updated_at'] is String ? DateTime.parse(r['updated_at'] as String) : DateTime.now(),
+      );
+    }).toList();
 
-    final assignments = remote.map((row) => Assignment(
-      id: row['id'],
-      courseId: row['courseId'],
-      userId: row['userId'],
-      title: row['title'],
-      description: row['description'],
-      dueDate: row['dueDate'] != null ? DateTime.parse(row['dueDate']) : null,
-      isCompleted: row['isCompleted'],
-      completedAt: row['completedAt'] != null ? DateTime.parse(row['completedAt']) : null,
-      createdAt: DateTime.parse(row['createdAt']),
-      updatedAt: DateTime.parse(row['updatedAt']),
-    )).toList();
-
-    // Sync to local
     for (final a in assignments) {
-      final exists = await _db.select(_db.assignments).where((a) => a.id).getSingleOrNull();
+      final exists = await (_db.select(_db.assignments)
+            ..where((t) => t.id.equals(a.id)))
+          .getSingleOrNull();
       if (exists != null) {
         await _db.update(_db.assignments).replace(a);
       } else {
         await _db.into(_db.assignments).insert(a);
       }
     }
-
     return assignments;
+  }
+
+  Future<void> createAssignment(String courseId, String title) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('Not authenticated');
+    final id = const Uuid().v4();
+    final now = DateTime.now();
+
+    await _supabase.from('assignments').insert({
+      'id': id,
+      'course_id': courseId,
+      'user_id': userId,
+      'title': title,
+      'is_completed': false,
+      'created_at': now.toIso8601String(),
+      'updated_at': now.toIso8601String(),
+    });
+
+    await _db.into(_db.assignments).insert(Assignment(
+      id: id,
+      courseId: courseId,
+      userId: userId,
+      title: title,
+      isCompleted: false,
+      createdAt: now,
+      updatedAt: now,
+    ));
   }
 
   Future<void> toggleAssignmentCompletion(String assignmentId, bool completed) async {
     final now = DateTime.now();
     await _supabase.from('assignments').update({
-      'isCompleted': completed,
-      'completedAt': completed ? now.toIso8601String() : null,
-      'updatedAt': now.toIso8601String(),
+      'is_completed': completed,
+      'completed_at': completed ? now.toIso8601String() : null,
+      'updated_at': now.toIso8601String(),
     }).eq('id', assignmentId);
 
     await (_db.update(_db.assignments)

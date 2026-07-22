@@ -19,12 +19,27 @@ final coursesProvider = StreamProvider<List<Course>>((ref) {
 
 final selectedCourseProvider = StateProvider<Course?>((ref) => null);
 
-final lecturesProvider = FutureProvider.family<List<Lecture>, String>((ref, courseId) async {
+final lecturesProvider =
+    FutureProvider.family<List<Lecture>, String>((ref, courseId) async {
   final service = ref.watch(academicsServiceProvider);
   return service.getLectures(courseId: courseId);
 });
 
-final assignmentsProvider = FutureProvider.family<List<Assignment>, String>((ref, courseId) async {
+final assignmentsProvider =
+    FutureProvider.family<List<Assignment>, String>((ref, courseId) async {
   final service = ref.watch(academicsServiceProvider);
   return service.watchAssignments(courseId: courseId);
+});
+
+final courseProgressProvider =
+    FutureProvider.family<double, String>((ref, courseId) async {
+  final lectures = await ref.watch(lecturesProvider(courseId).future);
+  final assignments = await ref.watch(assignmentsProvider(courseId).future);
+
+  final total = lectures.length + assignments.length;
+  if (total == 0) return 0.0;
+
+  final done = lectures.where((l) => l.isCompleted).length +
+      assignments.where((a) => a.isCompleted).length;
+  return done / total;
 });
