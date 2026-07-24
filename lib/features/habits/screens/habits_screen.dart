@@ -25,6 +25,25 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
   static final DateTime _referenceDate = DateTime(2025, 8, 12);
   int _dayOffset = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    // Register the habit add action for the global Add button
+    Future.microtask(() {
+      ref.read(globalAddActionProvider.notifier).state = () => _showAddHabitDialog();
+    });
+  }
+
+  @override
+  void dispose() {
+    // Clear the action when leaving the screen if it's still this screen's action
+    if (ref.read(globalAddActionProvider) == _showAddHabitDialog) {
+      ref.read(globalAddActionProvider.notifier).state = null;
+    }
+    super.dispose();
+  }
+
+
   static const _weekdayNames = [
     'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
     'Sunday',

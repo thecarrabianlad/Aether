@@ -883,9 +883,6 @@ class $LecturesTable extends Lectures with TableInfo<$LecturesTable, Lecture> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES courses (id)',
-    ),
   );
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
@@ -1603,9 +1600,6 @@ class $AssignmentsTable extends Assignments
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES courses (id)',
-    ),
   );
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
@@ -2257,48 +2251,6 @@ typedef $$CoursesTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$CoursesTableReferences
-    extends BaseReferences<_$AppDatabase, $CoursesTable, Course> {
-  $$CoursesTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$LecturesTable, List<Lecture>> _lecturesRefsTable(
-    _$AppDatabase db,
-  ) => MultiTypedResultKey.fromTable(
-    db.lectures,
-    aliasName: 'courses__id__lectures__course_id',
-  );
-
-  $$LecturesTableProcessedTableManager get lecturesRefs {
-    final manager = $$LecturesTableTableManager(
-      $_db,
-      $_db.lectures,
-    ).filter((f) => f.courseId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_lecturesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$AssignmentsTable, List<Assignment>>
-  _assignmentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.assignments,
-    aliasName: 'courses__id__assignments__course_id',
-  );
-
-  $$AssignmentsTableProcessedTableManager get assignmentsRefs {
-    final manager = $$AssignmentsTableTableManager(
-      $_db,
-      $_db.assignments,
-    ).filter((f) => f.courseId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_assignmentsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
 class $$CoursesTableFilterComposer
     extends Composer<_$AppDatabase, $CoursesTable> {
   $$CoursesTableFilterComposer({
@@ -2382,56 +2334,6 @@ class $$CoursesTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  Expression<bool> lecturesRefs(
-    Expression<bool> Function($$LecturesTableFilterComposer f) f,
-  ) {
-    final $$LecturesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.lectures,
-      getReferencedColumn: (t) => t.courseId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$LecturesTableFilterComposer(
-            $db: $db,
-            $table: $db.lectures,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> assignmentsRefs(
-    Expression<bool> Function($$AssignmentsTableFilterComposer f) f,
-  ) {
-    final $$AssignmentsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.assignments,
-      getReferencedColumn: (t) => t.courseId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$AssignmentsTableFilterComposer(
-            $db: $db,
-            $table: $db.assignments,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$CoursesTableOrderingComposer
@@ -2578,56 +2480,6 @@ class $$CoursesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  Expression<T> lecturesRefs<T extends Object>(
-    Expression<T> Function($$LecturesTableAnnotationComposer a) f,
-  ) {
-    final $$LecturesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.lectures,
-      getReferencedColumn: (t) => t.courseId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$LecturesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.lectures,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> assignmentsRefs<T extends Object>(
-    Expression<T> Function($$AssignmentsTableAnnotationComposer a) f,
-  ) {
-    final $$AssignmentsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.assignments,
-      getReferencedColumn: (t) => t.courseId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$AssignmentsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.assignments,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$CoursesTableTableManager
@@ -2641,9 +2493,9 @@ class $$CoursesTableTableManager
           $$CoursesTableAnnotationComposer,
           $$CoursesTableCreateCompanionBuilder,
           $$CoursesTableUpdateCompanionBuilder,
-          (Course, $$CoursesTableReferences),
+          (Course, BaseReferences<_$AppDatabase, $CoursesTable, Course>),
           Course,
-          PrefetchHooks Function({bool lecturesRefs, bool assignmentsRefs})
+          PrefetchHooks Function()
         > {
   $$CoursesTableTableManager(_$AppDatabase db, $CoursesTable table)
     : super(
@@ -2729,70 +2581,9 @@ class $$CoursesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$CoursesTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback:
-              ({lecturesRefs = false, assignmentsRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (lecturesRefs) db.lectures,
-                    if (assignmentsRefs) db.assignments,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (lecturesRefs)
-                        await $_getPrefetchedData<
-                          Course,
-                          $CoursesTable,
-                          Lecture
-                        >(
-                          currentTable: table,
-                          referencedTable: $$CoursesTableReferences
-                              ._lecturesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$CoursesTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).lecturesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.courseId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (assignmentsRefs)
-                        await $_getPrefetchedData<
-                          Course,
-                          $CoursesTable,
-                          Assignment
-                        >(
-                          currentTable: table,
-                          referencedTable: $$CoursesTableReferences
-                              ._assignmentsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$CoursesTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).assignmentsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.courseId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -2807,9 +2598,9 @@ typedef $$CoursesTableProcessedTableManager =
       $$CoursesTableAnnotationComposer,
       $$CoursesTableCreateCompanionBuilder,
       $$CoursesTableUpdateCompanionBuilder,
-      (Course, $$CoursesTableReferences),
+      (Course, BaseReferences<_$AppDatabase, $CoursesTable, Course>),
       Course,
-      PrefetchHooks Function({bool lecturesRefs, bool assignmentsRefs})
+      PrefetchHooks Function()
     >;
 typedef $$LecturesTableCreateCompanionBuilder =
     LecturesCompanion Function({
@@ -2844,28 +2635,6 @@ typedef $$LecturesTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$LecturesTableReferences
-    extends BaseReferences<_$AppDatabase, $LecturesTable, Lecture> {
-  $$LecturesTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $CoursesTable _courseIdTable(_$AppDatabase db) =>
-      db.courses.createAlias('lectures__course_id__courses__id');
-
-  $$CoursesTableProcessedTableManager get courseId {
-    final $_column = $_itemColumn<String>('course_id')!;
-
-    final manager = $$CoursesTableTableManager(
-      $_db,
-      $_db.courses,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_courseIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
 class $$LecturesTableFilterComposer
     extends Composer<_$AppDatabase, $LecturesTable> {
   $$LecturesTableFilterComposer({
@@ -2877,6 +2646,11 @@ class $$LecturesTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get courseId => $composableBuilder(
+    column: $table.courseId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2929,29 +2703,6 @@ class $$LecturesTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$CoursesTableFilterComposer get courseId {
-    final $$CoursesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.courseId,
-      referencedTable: $db.courses,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoursesTableFilterComposer(
-            $db: $db,
-            $table: $db.courses,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$LecturesTableOrderingComposer
@@ -2965,6 +2716,11 @@ class $$LecturesTableOrderingComposer
   });
   ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get courseId => $composableBuilder(
+    column: $table.courseId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3017,29 +2773,6 @@ class $$LecturesTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$CoursesTableOrderingComposer get courseId {
-    final $$CoursesTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.courseId,
-      referencedTable: $db.courses,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoursesTableOrderingComposer(
-            $db: $db,
-            $table: $db.courses,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$LecturesTableAnnotationComposer
@@ -3053,6 +2786,9 @@ class $$LecturesTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get courseId =>
+      $composableBuilder(column: $table.courseId, builder: (column) => column);
 
   GeneratedColumn<String> get userId =>
       $composableBuilder(column: $table.userId, builder: (column) => column);
@@ -3091,29 +2827,6 @@ class $$LecturesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  $$CoursesTableAnnotationComposer get courseId {
-    final $$CoursesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.courseId,
-      referencedTable: $db.courses,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoursesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.courses,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$LecturesTableTableManager
@@ -3127,9 +2840,9 @@ class $$LecturesTableTableManager
           $$LecturesTableAnnotationComposer,
           $$LecturesTableCreateCompanionBuilder,
           $$LecturesTableUpdateCompanionBuilder,
-          (Lecture, $$LecturesTableReferences),
+          (Lecture, BaseReferences<_$AppDatabase, $LecturesTable, Lecture>),
           Lecture,
-          PrefetchHooks Function({bool courseId})
+          PrefetchHooks Function()
         > {
   $$LecturesTableTableManager(_$AppDatabase db, $LecturesTable table)
     : super(
@@ -3203,54 +2916,9 @@ class $$LecturesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$LecturesTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({courseId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (courseId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.courseId,
-                                referencedTable: $$LecturesTableReferences
-                                    ._courseIdTable(db),
-                                referencedColumn: $$LecturesTableReferences
-                                    ._courseIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -3265,9 +2933,9 @@ typedef $$LecturesTableProcessedTableManager =
       $$LecturesTableAnnotationComposer,
       $$LecturesTableCreateCompanionBuilder,
       $$LecturesTableUpdateCompanionBuilder,
-      (Lecture, $$LecturesTableReferences),
+      (Lecture, BaseReferences<_$AppDatabase, $LecturesTable, Lecture>),
       Lecture,
-      PrefetchHooks Function({bool courseId})
+      PrefetchHooks Function()
     >;
 typedef $$AssignmentsTableCreateCompanionBuilder =
     AssignmentsCompanion Function({
@@ -3298,28 +2966,6 @@ typedef $$AssignmentsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$AssignmentsTableReferences
-    extends BaseReferences<_$AppDatabase, $AssignmentsTable, Assignment> {
-  $$AssignmentsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $CoursesTable _courseIdTable(_$AppDatabase db) =>
-      db.courses.createAlias('assignments__course_id__courses__id');
-
-  $$CoursesTableProcessedTableManager get courseId {
-    final $_column = $_itemColumn<String>('course_id')!;
-
-    final manager = $$CoursesTableTableManager(
-      $_db,
-      $_db.courses,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_courseIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
 class $$AssignmentsTableFilterComposer
     extends Composer<_$AppDatabase, $AssignmentsTable> {
   $$AssignmentsTableFilterComposer({
@@ -3331,6 +2977,11 @@ class $$AssignmentsTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get courseId => $composableBuilder(
+    column: $table.courseId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3373,29 +3024,6 @@ class $$AssignmentsTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$CoursesTableFilterComposer get courseId {
-    final $$CoursesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.courseId,
-      referencedTable: $db.courses,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoursesTableFilterComposer(
-            $db: $db,
-            $table: $db.courses,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$AssignmentsTableOrderingComposer
@@ -3409,6 +3037,11 @@ class $$AssignmentsTableOrderingComposer
   });
   ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get courseId => $composableBuilder(
+    column: $table.courseId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3451,29 +3084,6 @@ class $$AssignmentsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$CoursesTableOrderingComposer get courseId {
-    final $$CoursesTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.courseId,
-      referencedTable: $db.courses,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoursesTableOrderingComposer(
-            $db: $db,
-            $table: $db.courses,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$AssignmentsTableAnnotationComposer
@@ -3487,6 +3097,9 @@ class $$AssignmentsTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get courseId =>
+      $composableBuilder(column: $table.courseId, builder: (column) => column);
 
   GeneratedColumn<String> get userId =>
       $composableBuilder(column: $table.userId, builder: (column) => column);
@@ -3517,29 +3130,6 @@ class $$AssignmentsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  $$CoursesTableAnnotationComposer get courseId {
-    final $$CoursesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.courseId,
-      referencedTable: $db.courses,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CoursesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.courses,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$AssignmentsTableTableManager
@@ -3553,9 +3143,12 @@ class $$AssignmentsTableTableManager
           $$AssignmentsTableAnnotationComposer,
           $$AssignmentsTableCreateCompanionBuilder,
           $$AssignmentsTableUpdateCompanionBuilder,
-          (Assignment, $$AssignmentsTableReferences),
+          (
+            Assignment,
+            BaseReferences<_$AppDatabase, $AssignmentsTable, Assignment>,
+          ),
           Assignment,
-          PrefetchHooks Function({bool courseId})
+          PrefetchHooks Function()
         > {
   $$AssignmentsTableTableManager(_$AppDatabase db, $AssignmentsTable table)
     : super(
@@ -3621,54 +3214,9 @@ class $$AssignmentsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$AssignmentsTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({courseId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (courseId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.courseId,
-                                referencedTable: $$AssignmentsTableReferences
-                                    ._courseIdTable(db),
-                                referencedColumn: $$AssignmentsTableReferences
-                                    ._courseIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -3683,9 +3231,12 @@ typedef $$AssignmentsTableProcessedTableManager =
       $$AssignmentsTableAnnotationComposer,
       $$AssignmentsTableCreateCompanionBuilder,
       $$AssignmentsTableUpdateCompanionBuilder,
-      (Assignment, $$AssignmentsTableReferences),
+      (
+        Assignment,
+        BaseReferences<_$AppDatabase, $AssignmentsTable, Assignment>,
+      ),
       Assignment,
-      PrefetchHooks Function({bool courseId})
+      PrefetchHooks Function()
     >;
 
 class $AppDatabaseManager {

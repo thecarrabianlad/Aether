@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:aether/screens/schedule/schedule_screen.dart';
-import 'package:aether/screens/tasks/daily_tasks_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:aether/core/providers.dart';
+import 'package:aether/core/database/database.dart';
+import 'package:aether/features/academics/providers/academics_providers.dart';
+import 'package:aether/features/habits/providers/habits_providers.dart'; // Added for habits provider
+import 'package:aether/features/habits/models/habit.dart'; // Added for Habit model
+import 'package:aether/features/habits/widgets/add_habit_dialog.dart'; // Added for habits dialog
+import 'package:aether/widgets/common/glass_card.dart';
 /// ---------------------------------------------------------------------
 /// AETHER — Dashboard content
 /// ---------------------------------------------------------------------

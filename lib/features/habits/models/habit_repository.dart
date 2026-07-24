@@ -9,8 +9,11 @@ import 'package:aether/features/habits/models/habit.dart';
 class HabitRepository {
   HabitRepository._();
 
-  static final List<Habit> _habits = _seedHabits();
-  static int _nextId = _habits.length + 1;
+  static final List<Habit> _habits = <Habit>[];
+  static int _nextId = 1;
+
+  /// Resets the ID counter (used in tests).
+  static void resetIdCounter() => _nextId = 1;
 
   // ── Category colours used across the feature ──
   static const Color redAccent = Color(0xFFE8443F);
@@ -110,101 +113,4 @@ class HabitRepository {
     return WeeklyProgressData(dailyCounts: counts, maxCount: max > 0 ? max : 1);
   }
 
-  // ── Seed data matching the reference image closely ──
-
-  static List<Habit> _seedHabits() {
-    return [
-      Habit(
-        id: 'h1',
-        name: 'Read',
-        category: HabitCategory.study,
-        icon: Icons.menu_book_outlined,
-        color: const Color(0xFF8B5CF6),
-        currentStreak: 12,
-        longestStreak: 28,
-        weeklyCompletions: 5,
-        weeklyTotal: 7,
-        dayCompletions: [true, true, true, false, true, true, false],
-        isCompletedToday: false,
-      ),
-      Habit(
-        id: 'h2',
-        name: 'Meditate',
-        category: HabitCategory.mind,
-        icon: Icons.self_improvement,
-        color: const Color(0xFFFF9500),
-        currentStreak: 1,
-        longestStreak: 14,
-        weeklyCompletions: 3,
-        weeklyTotal: 7,
-        dayCompletions: [true, false, false, false, true, false, true],
-        isCompletedToday: true,
-      ),
-      Habit(
-        id: 'h3',
-        name: 'Running',
-        category: HabitCategory.health,
-        icon: Icons.directions_run,
-        color: const Color(0xFF34C759),
-        currentStreak: 4,
-        longestStreak: 21,
-        weeklyCompletions: 4,
-        weeklyTotal: 7,
-        dayCompletions: [false, true, true, false, true, false, true],
-        isCompletedToday: true,
-      ),
-      Habit(
-        id: 'h4',
-        name: 'Skincare',
-        category: HabitCategory.health,
-        icon: Icons.spa_outlined,
-        color: const Color(0xFF34C759),
-        currentStreak: 7,
-        longestStreak: 30,
-        weeklyCompletions: 6,
-        weeklyTotal: 7,
-        dayCompletions: [true, true, true, true, false, true, true],
-        isCompletedToday: true,
-      ),
-      Habit(
-        id: 'h5',
-        name: 'No Sugar',
-        category: HabitCategory.health,
-        icon: Icons.water_drop_outlined,
-        color: const Color(0xFF34C759),
-        currentStreak: 2,
-        longestStreak: 5,
-        weeklyCompletions: 2,
-        weeklyTotal: 7,
-        dayCompletions: [false, false, false, false, false, true, true],
-        isCompletedToday: true,
-      ),
-      Habit(
-        id: 'h6',
-        name: 'Study Math',
-        category: HabitCategory.study,
-        icon: Icons.calculate_outlined,
-        color: const Color(0xFF8B5CF6),
-        currentStreak: 0,
-        longestStreak: 3,
-        weeklyCompletions: 0,
-        weeklyTotal: 7,
-        dayCompletions: [false, false, false, false, false, false, false],
-        isCompletedToday: false,
-      ),
-      Habit(
-        id: 'h7',
-        name: 'Medication',
-        category: HabitCategory.health,
-        icon: Icons.medication_outlined,
-        color: const Color(0xFF34C759),
-        currentStreak: 0,
-        longestStreak: 10,
-        weeklyCompletions: 0,
-        weeklyTotal: 7,
-        dayCompletions: [false, false, false, false, false, false, false],
-        isCompletedToday: false,
-      ),
-    ];
-  }
 }
